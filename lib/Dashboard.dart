@@ -12,6 +12,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   DateTime _currentTime = DateTime.now();
   late final Timer _clockTimer;
+  int _numberOfCheckIns = 0;
+  final int _goal = 7;
 
   @override
   void initState() {
@@ -42,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Habit Mastery League'),
         centerTitle: true,
         actions: [
-            TextButton(
+            OutlinedButton(
                 onPressed: () {
                     Navigator.push(
                         context,
@@ -54,6 +56,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: const Text("Add Habit")
             ),
         ],
+
+        // Here this block we are adding the buttons for the check-ins and progress 
+        
+    
+
 
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(32),
@@ -69,8 +76,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
+      body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+            
+
+                    OutlinedButton(
+                        onPressed: _numberOfCheckIns < _goal
+                        ? () {
+                            setState((){
+                            
+                                _numberOfCheckIns++;
+                            });
+                        }
+                        : null,
+                    child: const Text('Check In'),
+
+                    ),
+
+                    const SizedBox(height: 16),
+                    Text('Progress: $_numberOfCheckIns / $_goal'),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                        value: _numberOfCheckIns / _goal,
+                        ),
+                ],
+            ),
+        ),
+
       
 
-    );
+      );
   }
 }
