@@ -56,11 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: const Text("Add Habit")
             ),
         ],
-
-        // Here this block we are adding the buttons for the check-ins and progress 
         
-    
-
 
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(32),
@@ -79,12 +75,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
             
 
                     OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(220, 48),
+                        ),
                         onPressed: _numberOfCheckIns < _goal
                         ? () {
                             setState((){
