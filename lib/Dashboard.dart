@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'add_habit.dart';
+import 'add_habit_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -47,17 +47,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const add_habit_Screen().
+                            builder: (context) => const add_habit_Screen(),
                         ),
                     );
                 },
                 child: const Text("Add Habit")
-            )
-        ]
-
-
-
-
+            ),
+        ],
 
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(32),
@@ -74,9 +70,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       
-
-
-
 
     );
   }
