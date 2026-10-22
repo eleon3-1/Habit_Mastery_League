@@ -131,6 +131,29 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     bool isEditing = widget.habit != null;
 
     return Scaffold(
+///////////////////////THIS ADDS THE DASHBOARD///////////////////////////////////////
+      bottomNavigationBar: NavigationBar(
+  selectedIndex: 1,
+  onDestinationSelected: _isSaving
+      ? null
+      : (index) {
+          if (index == 0) {
+            Navigator.pop(context);
+          }
+        },
+  destinations: const [
+    NavigationDestination(
+      icon: Icon(Icons.home_outlined),
+      label: 'Dashboard',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.add_circle_outline),
+      label: 'Add Habit',
+    ),
+  ],
+),
+
+//////////////////////////////////////////////////////////////
       backgroundColor: backgroundGreen,
 
       appBar: AppBar(
