@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
 
 class AddHabitScreen extends StatefulWidget {
   final Map<String, dynamic>? habit;
@@ -15,6 +16,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   final reasonController = TextEditingController();
 
   double weeklyTarget = 3;
+  bool _isSaving = false;
 
   final lightGreen = const Color(0xFFA5D6A7);
   final backgroundGreen = const Color(0xFFE8F5E9);
@@ -33,27 +35,88 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
   }
 
-  void saveHabit() {
-    if (titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a habit title')),
-      );
-      return;
+  Future<void> saveHabit() async {
+  if (_isSaving) return;
+
+  final title = titleController.text.trim();
+  final category = categoryController.text.trim();
+
+  if (title.isEmpty || category.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please enter a title and category'),
+      ),
+    );
+    return;
+  }
+
+  final habit = <String, dynamic>{
+    'id': widget.habit?['id'],
+    'title': title,
+    'category': category,
+    'target': weeklyTarget.toInt(),
+    'reason': reasonController.text.trim(),
+  };
+
+  setState(() {
+    _isSaving = true;
+  });
+
+  try {
+    habit['id'] = await DatabaseHelper.saveHabit(habit);
+
+    if (!mounted) return;
+    Navigator.pop(context, habit);
+  } catch (error) {
+    debugPrint('Habit save failed: $error');
+
+    if (!mounted) return;
+
+    setState(() {
+      _isSaving = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not save habit. Please try again.'),
+      ),
+    );
+  }
+}
+
+
+  Future<void> deleteHabit() async {
+  if (_isSaving) return;
+
+  setState(() {
+    _isSaving = true;
+  });
+
+  try {
+    final id = widget.habit?['id'] as int?;
+
+    if (id != null) {
+      await DatabaseHelper.deleteHabit(id);
     }
 
-    final habit = {
-      'title': titleController.text.trim(),
-      'category': categoryController.text.trim(),
-      'target': weeklyTarget.toInt(),
-      'reason': reasonController.text.trim(),
-    };
-
-    Navigator.pop(context, habit);
-  }
-
-  void deleteHabit() {
+    if (!mounted) return;
     Navigator.pop(context, {'deleted': true});
+  } catch (error) {
+    debugPrint('Habit deletion failed: $error');
+
+    if (!mounted) return;
+
+    setState(() {
+      _isSaving = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Could not delete habit. Please try again.'),
+      ),
+    );
   }
+}
 
   @override
   void dispose() {
@@ -131,11 +194,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               activeColor: sliderGreen,
               inactiveColor: const Color(0xFFC8E6C9),
               label: weeklyTarget.toInt().toString(),
-              onChanged: (value) {
-                setState(() {
-                  weeklyTarget = value;
-                });
-              },
+              onChanged: _isSaving
+              ? null
+              : (value) {
+                  setState(() {
+                    weeklyTarget = value;
+                  });
+                },
             ),
 
             const SizedBox(height: 20),
@@ -170,7 +235,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: saveHabit,
+                onPressed: _isSaving ? null : saveHabit,
                 child: Text(isEditing ? 'Update Habit' : 'Save Habit'),
               ),
             ),
@@ -186,7 +251,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                     side: BorderSide(color: Colors.red.shade300),
                     padding: const EdgeInsets.all(16),
                   ),
-                  onPressed: deleteHabit,
+                  onPressed: _isSaving ? null : deleteHabit,
                   child: const Text('Delete Habit'),
                 ),
               ),
