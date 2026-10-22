@@ -11,18 +11,21 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+/////////////////////////////STORES CLOCK, HABITS, and LOADING STATUS////////////////////////////////////////////////////////
   DateTime _currentTime = DateTime.now();
   late final Timer _clockTimer;
   List<Map<String, dynamic>> _habits = [];
   final Set<int> _checkingInIds = {};
   bool _isLoading = true;
   String? _loadError;
-  
+/////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////_LOADS HABITS AND STARTS THE CLOCK WHEN OEPN/////////////////////////////////////////////////////
   @override
   void initState() {
     super.initState();
     _loadHabits();
+
 
     _clockTimer = Timer.periodic(
   const Duration(seconds: 1),
@@ -40,6 +43,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   },
 );
   }
+/////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////_READS SAVED HABITS AND WEEKLY PROGRESS_//////////////////////////////////////////////////////
   Future<void> _loadHabits() async {
   if (!mounted) return;
 
@@ -71,6 +77,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////_OPENS THE APP/EDIT AND REFRESEHES THE DASHBOARD AFTER_//////////////////////////////////////////////////////
+
 Future<void> _openHabit({Map<String, dynamic>? habit}) async {
   await Navigator.push(
     context,
@@ -83,6 +94,11 @@ Future<void> _openHabit({Map<String, dynamic>? habit}) async {
 
   await _loadHabits();
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////_SAVES TODAY CHECK IN AND REFRESHES THE PROGRESS///////////////////////////////////////////////////
 
 Future<void> _checkIn(int habitId) async {
   if (_checkingInIds.contains(habitId)) return;
@@ -111,24 +127,50 @@ Future<void> _checkIn(int habitId) async {
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
 
-
-
+////////////////////////////////_STOPS CLOCK WHEN SCREEN IS REMOVED_/////////////////////////////////////////////////////
 
   @override
   void dispose() {
     _clockTimer.cancel();
     super.dispose();
   }
+/////////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////ADDS THE BOTTOM DASHBOARD/////////////////////////////////////
   @override
   Widget build(BuildContext context) {
     final time = TimeOfDay.fromDateTime(_currentTime).format(context);
 
     return Scaffold(
+
+      bottomNavigationBar: NavigationBar(
+  selectedIndex: 0,
+  onDestinationSelected: (index) {
+    if (index == 1) {
+      _openHabit();
+    }
+  },
+  destinations: const [
+    NavigationDestination(
+      icon: Icon(Icons.home_outlined),
+      label: 'Dashboard',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.add_circle_outline),
+      label: 'Add Habit',
+    ),
+  ],
+),
+/////////////////////////////////////////////////////////////////////////////////////
+///
+///
+//////////////////////////_TOP BAR WITH THE APP TITLE, ADD BUTTON, AND CLOCK_/////////////////////////////////////
       appBar: AppBar(
         title: const Text('Habit Mastery League'),
         centerTitle: true,
+////////////////////////////////// TOP ADD HABIT BUTTON //////////////////////////////////
         actions: [
             OutlinedButton(
                 onPressed: () => _openHabit(),
@@ -151,6 +193,10 @@ Future<void> _checkIn(int habitId) async {
           ),
         ),
       ),
+/////////////////////////////////////////////////////////////////////////////////////
+///
+///
+//////////////////////////////_MAIN CONTENT WITH SPACING AROUND THE EDGES_/////////////////////////////////////////////
       body: Padding(
             padding: const EdgeInsets.all(16),
             child: _isLoading
