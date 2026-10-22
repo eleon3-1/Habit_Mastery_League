@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import 'add_habit_screen.dart';
 import 'database_helper.dart';
 
@@ -17,103 +19,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final Set<int> _checkingInIds = {};
   bool _isLoading = true;
   String? _loadError;
-  
 
   @override
   void initState() {
     super.initState();
     _loadHabits();
 
-    _clockTimer = Timer.periodic(
-  const Duration(seconds: 1),
-  (_) {
-    final now = DateTime.now();
-    final dayChanged = !DateUtils.isSameDay(_currentTime, now);
+    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      final now = DateTime.now();
+      final dayChanged = !DateUtils.isSameDay(_currentTime, now);
 
-    setState(() {
-      _currentTime = now;
-    });
-
-    if (dayChanged) {
-      _loadHabits();
-    }
-  },
-);
-  }
-  Future<void> _loadHabits() async {
-  if (!mounted) return;
-
-  setState(() {
-    _isLoading = true;
-    _loadError = null;
-  });
-
-  try {
-    final rows = await DatabaseHelper.getHabits();
-
-    if (!mounted) return;
-
-    setState(() {
-      _habits = rows
-          .map((row) => Map<String, dynamic>.from(row))
-          .toList();
-      _isLoading = false;
-    });
-  } catch (error) {
-    debugPrint('Loading habits failed: $error');
-
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = false;
-      _loadError = 'Could not load habits.';
-    });
-  }
-}
-
-Future<void> _openHabit({Map<String, dynamic>? habit}) async {
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => AddHabitScreen(habit: habit),
-    ),
-  );
-
-  if (!mounted) return;
-
-  await _loadHabits();
-}
-
-Future<void> _checkIn(int habitId) async {
-  if (_checkingInIds.contains(habitId)) return;
-
-  setState(() {
-    _checkingInIds.add(habitId);
-  });
-
-  try {
-    await DatabaseHelper.checkIn(habitId);
-    await _loadHabits();
-  } catch (error) {
-    debugPrint('Check-in failed: $error');
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Could not save check-in.')),
-    );
-  } finally {
-    if (mounted) {
       setState(() {
-        _checkingInIds.remove(habitId);
+        _currentTime = now;
+      });
+
+      if (dayChanged) {
+        _loadHabits();
+      }
+    });
+  }
+
+  Future<void> _loadHabits() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
+
+    try {
+      final rows = await DatabaseHelper.getHabits();
+
+      if (!mounted) return;
+
+      setState(() {
+        _habits = rows.map((row) => Map<String, dynamic>.from(row)).toList();
+        _isLoading = false;
+      });
+    } catch (error) {
+      debugPrint('Loading habits failed: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _loadError = 'Could not load habits.';
       });
     }
   }
-}
 
+  Future<void> _openHabit({Map<String, dynamic>? habit}) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddHabitScreen(habit: habit)),
+    );
 
+    if (!mounted) return;
 
+    await _loadHabits();
+  }
 
+  Future<void> _checkIn(int habitId) async {
+    if (_checkingInIds.contains(habitId)) return;
+
+    setState(() {
+      _checkingInIds.add(habitId);
+    });
+
+    try {
+      await DatabaseHelper.checkIn(habitId);
+      await _loadHabits();
+    } catch (error) {
+      debugPrint('Check-in failed: $error');
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not save check-in.')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _checkingInIds.remove(habitId);
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -130,41 +121,36 @@ Future<void> _checkIn(int habitId) async {
         title: const Text('Habit Mastery League'),
         centerTitle: true,
         actions: [
-            OutlinedButton(
-                onPressed: () => _openHabit(),
-                child: const Text("Add Habit")
-            ),
+          OutlinedButton(
+            onPressed: () => _openHabit(),
+            child: const Text("Add Habit"),
+          ),
         ],
-        
 
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(32),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Padding(
-              padding: const EdgeInsets.only(
-                left: 16,
-                bottom: 8,
-              ),
+              padding: const EdgeInsets.only(left: 16, bottom: 8),
               child: Text(time),
             ),
           ),
         ),
       ),
+
       body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: _isLoading
-    ? const Center(
-        child: CircularProgressIndicator(),
-      )
-    : _loadError != null
-        ? Center(
-            child: TextButton(
-              onPressed: _loadHabits,
-              child: Text('$_loadError\nTap to retry'),
-            ),
-          )
-        : _habits.isEmpty
+        padding: const EdgeInsets.all(16),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _loadError != null
+            ? Center(
+                child: TextButton(
+                  onPressed: _loadHabits,
+                  child: Text('$_loadError\nTap to retry'),
+                ),
+              )
+            : _habits.isEmpty
             ? const Center(
                 child: Text('Press Add Habit to create your first habit.'),
               )
@@ -180,8 +166,9 @@ Future<void> _checkIn(int habitId) async {
                   final goalReached = completed >= target;
                   final busy = _checkingInIds.contains(id);
 
-                  final progress =
-                      (completed / target).clamp(0.0, 1.0).toDouble();
+                  final progress = (completed / target)
+                      .clamp(0.0, 1.0)
+                      .toDouble();
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -215,16 +202,14 @@ Future<void> _checkIn(int habitId) async {
                               goalReached
                                   ? 'Goal reached'
                                   : checkedToday
-                                      ? 'Checked in today'
-                                      : busy
-                                          ? 'Saving...'
-                                          : 'Check In',
+                                  ? 'Checked in today'
+                                  : busy
+                                  ? 'Saving...'
+                                  : 'Check In',
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            'Progress: $completed / $target days this week',
-                          ),
+                          Text('Progress: $completed / $target days this week'),
                           const SizedBox(height: 8),
                           LinearProgressIndicator(value: progress),
                         ],
@@ -233,10 +218,7 @@ Future<void> _checkIn(int habitId) async {
                   );
                 },
               ),
-        ),
-
-      
-
-      );
+      ),
+    );
   }
 }

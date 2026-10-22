@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'database_helper.dart';
 
 class AddHabitScreen extends StatefulWidget {
@@ -36,87 +37,84 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   }
 
   Future<void> saveHabit() async {
-  if (_isSaving) return;
+    if (_isSaving) return;
 
-  final title = titleController.text.trim();
-  final category = categoryController.text.trim();
+    final title = titleController.text.trim();
+    final category = categoryController.text.trim();
 
-  if (title.isEmpty || category.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please enter a title and category'),
-      ),
-    );
-    return;
-  }
-
-  final habit = <String, dynamic>{
-    'id': widget.habit?['id'],
-    'title': title,
-    'category': category,
-    'target': weeklyTarget.toInt(),
-    'reason': reasonController.text.trim(),
-  };
-
-  setState(() {
-    _isSaving = true;
-  });
-
-  try {
-    habit['id'] = await DatabaseHelper.saveHabit(habit);
-
-    if (!mounted) return;
-    Navigator.pop(context, habit);
-  } catch (error) {
-    debugPrint('Habit save failed: $error');
-
-    if (!mounted) return;
-
-    setState(() {
-      _isSaving = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Could not save habit. Please try again.'),
-      ),
-    );
-  }
-}
-
-
-  Future<void> deleteHabit() async {
-  if (_isSaving) return;
-
-  setState(() {
-    _isSaving = true;
-  });
-
-  try {
-    final id = widget.habit?['id'] as int?;
-
-    if (id != null) {
-      await DatabaseHelper.deleteHabit(id);
+    if (title.isEmpty || category.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a title and category')),
+      );
+      return;
     }
 
-    if (!mounted) return;
-    Navigator.pop(context, {'deleted': true});
-  } catch (error) {
-    debugPrint('Habit deletion failed: $error');
-
-    if (!mounted) return;
+    final habit = <String, dynamic>{
+      'id': widget.habit?['id'],
+      'title': title,
+      'category': category,
+      'target': weeklyTarget.toInt(),
+      'reason': reasonController.text.trim(),
+    };
 
     setState(() {
-      _isSaving = false;
+      _isSaving = true;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Could not delete habit. Please try again.'),
-      ),
-    );
+    try {
+      habit['id'] = await DatabaseHelper.saveHabit(habit);
+
+      if (!mounted) return;
+      Navigator.pop(context, habit);
+    } catch (error) {
+      debugPrint('Habit save failed: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isSaving = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save habit. Please try again.'),
+        ),
+      );
+    }
   }
-}
+
+  Future<void> deleteHabit() async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final id = widget.habit?['id'] as int?;
+
+      if (id != null) {
+        await DatabaseHelper.deleteHabit(id);
+      }
+
+      if (!mounted) return;
+      Navigator.pop(context, {'deleted': true});
+    } catch (error) {
+      debugPrint('Habit deletion failed: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isSaving = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not delete habit. Please try again.'),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -195,12 +193,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               inactiveColor: const Color(0xFFC8E6C9),
               label: weeklyTarget.toInt().toString(),
               onChanged: _isSaving
-              ? null
-              : (value) {
-                  setState(() {
-                    weeklyTarget = value;
-                  });
-                },
+                  ? null
+                  : (value) {
+                      setState(() {
+                        weeklyTarget = value;
+                      });
+                    },
             ),
 
             const SizedBox(height: 20),

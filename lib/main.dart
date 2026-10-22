@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dashboard.dart';
 
+import 'main_navigation.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,11 +16,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Habit Mastery League',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
-      home: const DashboardScreen(),
+      home: const MainNavigation(),
     );
   }
 }
