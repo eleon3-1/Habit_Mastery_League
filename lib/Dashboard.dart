@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'add_habit_screen.dart';
 import 'database_helper.dart';
+import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -79,11 +80,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+//////////////////// OPENS SETTINGS AND HANDLES ITS NAVIGATION ////////////////////
+Future<void> _openSettings() async {
+  final destination = await Navigator.push<int>(
+    context,
+    MaterialPageRoute<int>(
+      builder: (context) => const SettingsScreen(),
+    ),
+  );
 
-///////////////////////////////_OPENS THE APP/EDIT AND REFRESEHES THE DASHBOARD AFTER_//////////////////////////////////////////////////////
+  if (!mounted) return;
 
+  if (destination == 1) {
+    _openHabit();
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////// _OPENS THE APP/EDIT AND REFRESEHES THE DASHBOARD AFTER_/ ////////////////////
 Future<void> _openHabit({Map<String, dynamic>? habit}) async {
-  await Navigator.push(
+  final result = await Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => AddHabitScreen(habit: habit),
@@ -93,6 +111,12 @@ Future<void> _openHabit({Map<String, dynamic>? habit}) async {
   if (!mounted) return;
 
   await _loadHabits();
+
+  if (!mounted) return;
+
+  if (result == 2) {
+    _openSettings();
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -145,24 +169,19 @@ Future<void> _checkIn(int habitId) async {
 
     return Scaffold(
 
-      bottomNavigationBar: NavigationBar(
+//////////////////// DASHBOARD BOTTOM NAVIGATION ////////////////////
+bottomNavigationBar: NavigationBar(
   selectedIndex: 0,
   onDestinationSelected: (index) {
     if (index == 1) {
       _openHabit();
+    } else if (index == 2) {
+      _openSettings();
     }
   },
-  destinations: const [
-    NavigationDestination(
-      icon: Icon(Icons.home_outlined),
-      label: 'Dashboard',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.add_circle_outline),
-      label: 'Add Habit',
-    ),
-  ],
+  destinations: habitDestinations,
 ),
+
 /////////////////////////////////////////////////////////////////////////////////////
 ///
 ///

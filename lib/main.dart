@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dashboard.dart';
+import 'settings_screen.dart';
 
 
 void main() {
@@ -10,17 +11,36 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Habit Mastery League',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
+
+///////////////////////////// APPLIES THE SELECTED THEME TO THE APP ////////////////////
+@override
+Widget build(BuildContext context) {
+  return ValueListenableBuilder<ThemeMode>(
+    valueListenable: appThemeMode,
+    builder: (context, mode, child) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Habit Mastery League',
+
+//////////////////// Light appearance.////////////////////////////////////
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.green,
+          ),
         ),
-      ),
-      home: const DashboardScreen(),
-    );
-  }
-}
+
+///////////////////////////// Dark appearance.////////////////////////////////////
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.green,
+            brightness: Brightness.dark,
+          ),
+        ),
+
+        themeMode: mode,
+        home: const DashboardScreen(),
+      );
+    },
+  );
+} 
+} 
