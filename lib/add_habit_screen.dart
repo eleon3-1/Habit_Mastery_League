@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+
 import 'database_helper.dart';
-import 'settings_screen.dart';
 
 class AddHabitScreen extends StatefulWidget {
   final Map<String, dynamic>? habit;
@@ -12,6 +12,7 @@ class AddHabitScreen extends StatefulWidget {
 }
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
+  ///////////(TEXT BOXES, TARGET SLIDER VALUE, AND SAVING STATUS)/////////////
   final titleController = TextEditingController();
   final categoryController = TextEditingController();
   final reasonController = TextEditingController();
@@ -19,6 +20,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   double weeklyTarget = 3;
   bool _isSaving = false;
 
+  ///////////(SCREEN COLORS)/////////////
   final lightGreen = const Color(0xFFA5D6A7);
   final backgroundGreen = const Color(0xFFE8F5E9);
   final sliderGreen = const Color(0xFF66BB6A);
@@ -27,7 +29,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   void initState() {
     super.initState();
 
-    // Fill in the fields when editing a habit
+    ///////////(FILLS IN THE FIELDS WHEN EDITING A HABIT)/////////////
     if (widget.habit != null) {
       titleController.text = widget.habit!['title'] ?? '';
       categoryController.text = widget.habit!['category'] ?? '';
@@ -36,89 +38,89 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     }
   }
 
+  ///////////(CHECKS THE FIELDS, SAVES THE HABIT, AND GOES BACK)/////////////
   Future<void> saveHabit() async {
-  if (_isSaving) return;
+    if (_isSaving) return;
 
-  final title = titleController.text.trim();
-  final category = categoryController.text.trim();
+    final title = titleController.text.trim();
+    final category = categoryController.text.trim();
 
-  if (title.isEmpty || category.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please enter a title and category'),
-      ),
-    );
-    return;
-  }
-
-  final habit = <String, dynamic>{
-    'id': widget.habit?['id'],
-    'title': title,
-    'category': category,
-    'target': weeklyTarget.toInt(),
-    'reason': reasonController.text.trim(),
-  };
-
-  setState(() {
-    _isSaving = true;
-  });
-
-  try {
-    habit['id'] = await DatabaseHelper.saveHabit(habit);
-
-    if (!mounted) return;
-    Navigator.pop(context, habit);
-  } catch (error) {
-    debugPrint('Habit save failed: $error');
-
-    if (!mounted) return;
-
-    setState(() {
-      _isSaving = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Could not save habit. Please try again.'),
-      ),
-    );
-  }
-}
-
-
-  Future<void> deleteHabit() async {
-  if (_isSaving) return;
-
-  setState(() {
-    _isSaving = true;
-  });
-
-  try {
-    final id = widget.habit?['id'] as int?;
-
-    if (id != null) {
-      await DatabaseHelper.deleteHabit(id);
+    if (title.isEmpty || category.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a title and category')),
+      );
+      return;
     }
 
-    if (!mounted) return;
-    Navigator.pop(context, {'deleted': true});
-  } catch (error) {
-    debugPrint('Habit deletion failed: $error');
-
-    if (!mounted) return;
+    final habit = <String, dynamic>{
+      'id': widget.habit?['id'],
+      'title': title,
+      'category': category,
+      'target': weeklyTarget.toInt(),
+      'reason': reasonController.text.trim(),
+    };
 
     setState(() {
-      _isSaving = false;
+      _isSaving = true;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Could not delete habit. Please try again.'),
-      ),
-    );
-  }
-}
+    try {
+      habit['id'] = await DatabaseHelper.saveHabit(habit);
 
+      if (!mounted) return;
+      Navigator.pop(context, habit);
+    } catch (error) {
+      debugPrint('Habit save failed: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isSaving = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save habit. Please try again.'),
+        ),
+      );
+    }
+  }
+
+  ///////////(DELETES THE HABIT AND GOES BACK)/////////////
+  Future<void> deleteHabit() async {
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final id = widget.habit?['id'] as int?;
+
+      if (id != null) {
+        await DatabaseHelper.deleteHabit(id);
+      }
+
+      if (!mounted) return;
+      Navigator.pop(context, {'deleted': true});
+    } catch (error) {
+      debugPrint('Habit deletion failed: $error');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isSaving = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not delete habit. Please try again.'),
+        ),
+      );
+    }
+  }
+
+  ///////////(CLEANS UP THE TEXT BOXES WHEN THE SCREEN CLOSES)/////////////
   @override
   void dispose() {
     titleController.dispose();
@@ -132,27 +134,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     bool isEditing = widget.habit != null;
 
     return Scaffold(
+      ///////////(GREEN BACKGROUND IN LIGHT MODE)/////////////
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? Theme.of(context).scaffoldBackgroundColor
+          : backgroundGreen,
 
- //////////////////// THIS ADDS THE DASHBOARD////////////////////
-bottomNavigationBar: NavigationBar(
-  selectedIndex: 1,
-  onDestinationSelected: _isSaving
-      ? null
-      : (index) {
-          if (index != 1) {
-            Navigator.pop(context, index);
-          }
-        },
-  destinations: habitDestinations,
-),
-
-////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////
-backgroundColor: Theme.of(context).brightness == Brightness.dark
-    ? Theme.of(context).scaffoldBackgroundColor
-    : backgroundGreen,
-
+      ///////////(CREATE OR EDIT TITLE)/////////////
       appBar: AppBar(
         backgroundColor: lightGreen,
         foregroundColor: Colors.black87,
@@ -160,11 +147,13 @@ backgroundColor: Theme.of(context).brightness == Brightness.dark
         title: Text(isEditing ? 'Edit Habit' : 'Create Habit'),
       ),
 
+      ///////////(HABIT FORM)/////////////
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ///////////(TITLE BOX)/////////////
             const Text('Title', style: TextStyle(fontSize: 16)),
 
             const SizedBox(height: 8),
@@ -183,6 +172,7 @@ backgroundColor: Theme.of(context).brightness == Brightness.dark
 
             const SizedBox(height: 20),
 
+            ///////////(CATEGORY BOX)/////////////
             const Text('Category', style: TextStyle(fontSize: 16)),
 
             const SizedBox(height: 8),
@@ -201,6 +191,7 @@ backgroundColor: Theme.of(context).brightness == Brightness.dark
 
             const SizedBox(height: 20),
 
+            ///////////(WEEKLY TARGET SLIDER, 1 TO 7 DAYS)/////////////
             Text(
               'Weekly Target: ${weeklyTarget.toInt()} days',
               style: const TextStyle(fontSize: 16),
@@ -215,16 +206,17 @@ backgroundColor: Theme.of(context).brightness == Brightness.dark
               inactiveColor: const Color(0xFFC8E6C9),
               label: weeklyTarget.toInt().toString(),
               onChanged: _isSaving
-              ? null
-              : (value) {
-                  setState(() {
-                    weeklyTarget = value;
-                  });
-                },
+                  ? null
+                  : (value) {
+                      setState(() {
+                        weeklyTarget = value;
+                      });
+                    },
             ),
 
             const SizedBox(height: 20),
 
+            ///////////(REASON BOX)/////////////
             const Text('Reason', style: TextStyle(fontSize: 16)),
 
             const SizedBox(height: 8),
@@ -244,6 +236,7 @@ backgroundColor: Theme.of(context).brightness == Brightness.dark
 
             const SizedBox(height: 30),
 
+            ///////////(SAVE OR UPDATE BUTTON)/////////////
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -262,6 +255,7 @@ backgroundColor: Theme.of(context).brightness == Brightness.dark
 
             const SizedBox(height: 10),
 
+            ///////////(DELETE BUTTON, ONLY WHEN EDITING)/////////////
             if (isEditing)
               SizedBox(
                 width: double.infinity,
