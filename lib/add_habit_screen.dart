@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
+import 'settings_screen.dart';
 
 class AddHabitScreen extends StatefulWidget {
   final Map<String, dynamic>? habit;
@@ -131,30 +132,26 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     bool isEditing = widget.habit != null;
 
     return Scaffold(
-///////////////////////THIS ADDS THE DASHBOARD///////////////////////////////////////
-      bottomNavigationBar: NavigationBar(
+
+ //////////////////// THIS ADDS THE DASHBOARD////////////////////
+bottomNavigationBar: NavigationBar(
   selectedIndex: 1,
   onDestinationSelected: _isSaving
       ? null
       : (index) {
-          if (index == 0) {
-            Navigator.pop(context);
+          if (index != 1) {
+            Navigator.pop(context, index);
           }
         },
-  destinations: const [
-    NavigationDestination(
-      icon: Icon(Icons.home_outlined),
-      label: 'Dashboard',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.add_circle_outline),
-      label: 'Add Habit',
-    ),
-  ],
+  destinations: habitDestinations,
 ),
 
+////////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////
-      backgroundColor: backgroundGreen,
+backgroundColor: Theme.of(context).brightness == Brightness.dark
+    ? Theme.of(context).scaffoldBackgroundColor
+    : backgroundGreen,
 
       appBar: AppBar(
         backgroundColor: lightGreen,
@@ -177,7 +174,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               decoration: InputDecoration(
                 hintText: 'Enter habit title',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -195,7 +192,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               decoration: InputDecoration(
                 hintText: 'Enter category',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -238,7 +235,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
               decoration: InputDecoration(
                 hintText: 'Why do you want this habit?',
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
