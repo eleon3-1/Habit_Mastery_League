@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 ///////////(SHARED APP THEME)/////////////
 final appThemeMode = ValueNotifier<ThemeMode>(ThemeMode.light);
@@ -28,8 +29,19 @@ class SettingsScreen extends StatelessWidget {
             secondary: const Icon(Icons.dark_mode_outlined),
             title: const Text('Dark mode'),
             value: Theme.of(context).brightness == Brightness.dark,
-            onChanged: (enabled) {
+            onChanged: (enabled) async {
               appThemeMode.value = enabled ? ThemeMode.dark : ThemeMode.light;
+
+              ///////////(SAVES THE SETTING SO IT STAYS AFTER A RESTART)/////////////
+              try {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('dark_mode', enabled);
+              } catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Could not save the setting.')),
+                );
+              }
             },
           ),
 
