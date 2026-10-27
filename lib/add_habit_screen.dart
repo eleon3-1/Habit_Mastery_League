@@ -90,6 +90,27 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   Future<void> deleteHabit() async {
     if (_isSaving) return;
 
+    ///////////(ASKS BEFORE DELETING, BECAUSE IT ALSO DELETES ALL ITS CHECK-INS)/////////////
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete habit?'),
+        content: const Text('This also deletes all of its check-ins.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
     setState(() {
       _isSaving = true;
     });
