@@ -4,6 +4,26 @@ class HabitDetailScreen extends StatelessWidget {
   const HabitDetailScreen({super.key, required this.habit});
 
   final Map<String, dynamic> habit;
+  String _getHabitSuggestion(int target, int completed, bool checkedToday) {
+    if (completed >= target) {
+      return 'You reached your weekly goal!\n'
+          'Reason: you completed $completed of $target check-ins.';
+    }
+
+    final needed = target - completed;
+
+    final available = 7 - DateTime.now().weekday + (checkedToday ? 0 : 1);
+
+    if (needed > available) {
+      return 'Consider reviewing this week’s target.\n'
+          'Reason: you need $needed more check-ins, '
+          'but only $available days are available.';
+    }
+
+    return '${checkedToday ? 'Plan your next check-in.' : 'Try checking in today.'}\n'
+        'Reason: you need $needed more check-ins, '
+        'with $available days available this week.';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +61,16 @@ class HabitDetailScreen extends StatelessWidget {
               'Reason',
               reason.isEmpty ? 'No reason added.' : reason,
             ),
+            _infoCard(
+              context,
+              'Weekly goal helper',
+              _getHabitSuggestion(
+                target,
+                completed,
+                habit['checked_in_today'] == 1,
+              ),
+            ),
+
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
